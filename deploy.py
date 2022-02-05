@@ -66,3 +66,23 @@ print(transaction_hash)
 
 transaction_receipt = w3.eth.wait_for_transaction_receipt(transaction_hash)
 print(transaction_hash)
+
+# work with contract
+simple_storage = w3.eth.contract(address=transaction_receipt.contractAddress, abi=abi)
+print(simple_storage.functions.retrieve().call())
+
+store_transaction = simple_storage.functions.store(15).buildTransaction(
+    {
+        "chainId": chain_id,
+        "from": my_address,
+        "nonce": nonce + 1,
+    }
+)
+signed_store_transaction = w3.eth.account.sign_transaction(
+    store_transaction, private_key=private_key
+)
+transaction_hash = w3.eth.send_raw_transaction(signed_store_transaction.rawTransaction)
+stored_transaction_receipt = w3.eth.wait_for_transaction_receipt(transaction_hash)
+print(stored_transaction_receipt)
+
+print(simple_storage.functions.retrieve().call())
